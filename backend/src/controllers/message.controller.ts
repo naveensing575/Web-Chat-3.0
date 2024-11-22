@@ -1,14 +1,31 @@
 import { Request, Response, NextFunction } from "express";
-import MessageService from "../services/message.service";
+import MessageService from "@/services/message.service";
 
 class MessageController {
-  async createMessage(
+  async sendMessage(
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     try {
-      const message = await MessageService.createMessage(req.body);
+      const { senderId, receiverId, text } = req.body;
+
+      // Validate required fields
+      if (!senderId || !receiverId || (!text && !req.file)) {
+        res.status(400).json({
+          success: false,
+          message:
+            "senderId, receiverId, and at least one of text or image are required.",
+        });
+        return;
+      }
+
+      // Call the service to send the message
+      const message = await MessageService.sendMessage(
+        { senderId, receiverId, text },
+        req.file?.path
+      );
+
       res.status(201).json({ success: true, data: message });
     } catch (error) {
       next(error);

@@ -1,8 +1,26 @@
 import Message, { IMessage } from "@/models/message.model";
+import FileService from "@/services/FileService";
 
 class MessageService {
-  async createMessage(data: Partial<IMessage>): Promise<IMessage> {
-    return await Message.create(data);
+  async sendMessage(
+    data: Partial<IMessage>,
+    filePath?: string
+  ): Promise<IMessage> {
+    // Upload the image to Cloudinary if a file is provided
+    let imageUrl = "";
+    if (filePath) {
+      imageUrl = await FileService.uploadToCloudinary(filePath, "messages");
+    }
+
+    // Create the message
+    const messageData = {
+      senderId: data.senderId,
+      receiverId: data.receiverId,
+      text: data.text,
+      image: imageUrl || data.image,
+    };
+
+    return await Message.create(messageData);
   }
 
   async getMessagesByUser(userId: string): Promise<IMessage[]> {
@@ -25,6 +43,3 @@ class MessageService {
 }
 
 export default new MessageService();
-function User() {
-  throw new Error("Function not implemented.");
-}
