@@ -25,12 +25,10 @@ class UserService {
     userId: string,
     filePath: string
   ): Promise<IUser | null> {
-    // Upload to Cloudinary
     const uploadResult = await cloudinary.uploader.upload(filePath, {
       folder: "profile_pics",
     });
 
-    // Update user's profile picture
     return await User.findByIdAndUpdate(
       userId,
       { profilePic: uploadResult.secure_url },
@@ -40,6 +38,14 @@ class UserService {
 
   async deleteUser(userId: string): Promise<IUser | null> {
     return await User.findByIdAndDelete(userId);
+  }
+
+  // Updated: Get all users except the logged-in user
+  async getUserForSidebar(userId: string): Promise<IUser[]> {
+    const filteredUsers = await User.find({ _id: { $ne: userId } }).select(
+      "-password"
+    );
+    return filteredUsers;
   }
 }
 

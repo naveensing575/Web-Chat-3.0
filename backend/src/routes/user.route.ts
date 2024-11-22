@@ -6,6 +6,7 @@ const router = Router();
 const upload = multer({ dest: "uploads/" });
 
 router.post("/", UserController.createUser);
+router.get("/sidebar/:id", UserController.getUserForSidebar);
 router.get("/:id", UserController.getUserById);
 router.get("/", UserController.getAllUsers);
 router.put("/:id", UserController.updateUser);

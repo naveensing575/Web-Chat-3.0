@@ -21,10 +21,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Security Middleware
-app.use(helmet()); // Adds security headers
+app.use(helmet());
 
 // Logging Middleware
-app.use(morgan("combined")); // Logs HTTP requests in Apache combined format
+app.use(morgan("combined"));
 
 // Routes
 app.use("/api/auth", authRoutes);
