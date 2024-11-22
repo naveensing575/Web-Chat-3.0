@@ -6,7 +6,7 @@ const authMiddleware = (
   res: Response,
   next: NextFunction
 ): void => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
+  const token = req.cookies?.accessToken;
 
   if (!token) {
     res

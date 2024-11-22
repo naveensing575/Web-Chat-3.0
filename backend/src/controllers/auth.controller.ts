@@ -1,45 +1,90 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
-import userModel from "@/models/user.model";
+import { Request, Response } from "express";
+import AuthService from "@/services/auth.service";
 
 class AuthController {
-  async signIn(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async signIn(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
 
-      // Find user and verify password
-      const user = await userModel.findOne({ email });
-      if (!user || !(await bcrypt.compare(password, user.password))) {
+      if (!email || !password) {
         res
-          .status(401)
-          .json({ success: false, message: "Invalid credentials" });
+          .status(400)
+          .json({ success: false, message: "Email and password are required" });
         return;
       }
 
-      // Generate JWT token
-      const token = jwt.sign(
-        { id: user._id, email: user.email },
-        process.env.JWT_SECRET!,
-        {
-          expiresIn: "1d",
-        }
-      );
-
-      // Generate password expiration timestamp
-      const passwordExpiry = new Date();
-      passwordExpiry.setDate(passwordExpiry.getDate() + 1); // 1 day
-
-      // Set the cookie with password expiration timestamp
-      res.cookie("passwordExpiry", passwordExpiry.toISOString(), {
+      // Generate token and set it in a cookie
+      const token = await AuthService.signIn(email, password);
+      res.cookie("accessToken", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
+        secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
       });
 
-      res.status(200).json({ success: true, token });
-    } catch (error) {
-      next(error);
+      res.status(200).json({ success: true, message: "Sign-in successful" });
+    } catch (error: any) {
+      res.status(401).json({
+        success: false,
+        message: error.message || "Authentication failed",
+      });
+    }
+  }
+
+  async signUp(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, fullName, password } = req.body;
+
+      if (!email || !fullName || !password) {
+        res.status(400).json({
+          success: false,
+          message: "Email, full name, and password are required",
+        });
+        return;
+      }
+
+      // Generate token and set it in a cookie
+      const token = await AuthService.signUp(email, fullName, password);
+      res.cookie("accessToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+
+      res.status(201).json({ success: true, message: "Sign-up successful" });
+    } catch (error: any) {
+      res
+        .status(400)
+        .json({ success: false, message: error.message || "Sign-up failed" });
+    }
+  }
+
+  async signOut(req: Request, res: Response): Promise<void> {
+    try {
+      // Clear the accessToken cookie with the same properties
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+
+      res
+        .status(200)
+        .json({ success: true, message: "Logged out successfully" });
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ success: false, message: error.message || "Sign-out failed" });
+    }
+  }
+
+  async checkAuth(req: Request, res: Response): Promise<void> {
+    try {
+      res.status(200).json({ success: true, message: "Authenticated" });
+    } catch (error: any) {
+      res.status(401).json({
+        success: false,
+        message: error.message || "Authentication failed",
+      });
     }
   }
 }

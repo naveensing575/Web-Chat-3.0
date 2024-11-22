@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import UserService from "../services/user.service";
+import FileService from "@/services/FileService";
 
 class UserController {
   async createUser(
@@ -57,6 +58,41 @@ class UserController {
         return;
       }
       res.status(200).json({ success: true, data: user });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateProfilePic(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const file = req.file;
+      if (!file) {
+        res.status(400).json({ success: false, message: "No file uploaded" });
+        return;
+      }
+
+      // Upload file to Cloudinary
+      const uploadedImageUrl = await FileService.uploadToCloudinary(
+        file.path,
+        "profile_pics"
+      );
+
+      // Update user's profile picture in the database
+      const updatedUser = await UserService.updateProfilePic(
+        req.params.id,
+        uploadedImageUrl
+      );
+
+      if (!updatedUser) {
+        res.status(404).json({ success: false, message: "User not found" });
+        return;
+      }
+
+      res.status(200).json({ success: true, data: updatedUser });
     } catch (error) {
       next(error);
     }

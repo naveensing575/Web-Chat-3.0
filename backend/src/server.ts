@@ -1,10 +1,13 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import connectDB from "./config/dbConfig";
-import authRoutes from "./routes/auth.route";
-import userRoutes from "./routes/user.route";
-import messageRoutes from "./routes/message.route";
+import cookieParser from "cookie-parser";
+import "tsconfig-paths/register";
+import connectDB from "@/config/dbConfig";
+import authRoutes from "@/routes/auth.route";
+import userRoutes from "@/routes/user.route";
+import messageRoutes from "@/routes/message.route";
+import authMiddleware from "@/middlewares/authMiddleware";
 
 dotenv.config();
 
@@ -14,10 +17,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Middleware
+app.use(cookieParser());
+
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/messages", messageRoutes);
+app.use("/api/users", authMiddleware, userRoutes);
+app.use("/api/messages", authMiddleware, messageRoutes);
+
+// secure route
+app.get("/api/secure", authMiddleware, (req, res) => {
+  res.status(200).json({ success: true, message: "Secure route accessed" });
+});
 
 // Error handler
 app.use(

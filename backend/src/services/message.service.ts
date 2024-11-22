@@ -1,4 +1,4 @@
-import Message, { IMessage } from "../models/message.model";
+import Message, { IMessage } from "@/models/message.model";
 
 class MessageService {
   async createMessage(data: Partial<IMessage>): Promise<IMessage> {
