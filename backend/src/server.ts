@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import morgan from "morgan";
+import helmet from "helmet";
 import "tsconfig-paths/register";
 import connectDB from "@/config/dbConfig";
 import authRoutes from "@/routes/auth.route";
@@ -16,16 +18,20 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-
-// Middleware
 app.use(cookieParser());
+
+// Security Middleware
+app.use(helmet()); // Adds security headers
+
+// Logging Middleware
+app.use(morgan("combined")); // Logs HTTP requests in Apache combined format
 
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", authMiddleware, userRoutes);
 app.use("/api/messages", authMiddleware, messageRoutes);
 
-// secure route
+// Secure route
 app.get("/api/secure", authMiddleware, (req, res) => {
   res.status(200).json({ success: true, message: "Secure route accessed" });
 });

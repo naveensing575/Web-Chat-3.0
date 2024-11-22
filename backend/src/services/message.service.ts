@@ -25,3 +25,6 @@ class MessageService {
 }
 
 export default new MessageService();
+function User() {
+  throw new Error("Function not implemented.");
+}
