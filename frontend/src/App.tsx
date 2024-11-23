@@ -8,8 +8,8 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
-import Signup from "./pages/Signup";
-import Signin from "./pages/Signin";
+import Signup from "./pages/SignUp";
+import Signin from "./pages/SignIn";
 import { useAuthStore } from "./store/useAuthStore";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
@@ -31,26 +31,26 @@ const App = () => {
     );
 
   return (
-    <div>
+    <div className="flex flex-col h-screen ">
       <Navbar />
       <Router>
         <Routes>
           <Route
             path="/"
-            element={authUser ? <Home /> : <Navigate to="/signin" />}
+            element={authUser ? <Home /> : <Navigate to="/sign-in" />}
           />
           <Route
-            path="/signup"
+            path="/sign-up"
             element={!authUser ? <Signup /> : <Navigate to="/" />}
           />
           <Route
-            path="/signin"
+            path="/sign-in"
             element={!authUser ? <Signin /> : <Navigate to="/" />}
           />
           <Route path="/settings" element={<Settings />} />
           <Route
             path="/profile"
-            element={authUser ? <Profile /> : <Navigate to="/signin" />}
+            element={authUser ? <Profile /> : <Navigate to="/sign-in" />}
           />
         </Routes>
       </Router>
