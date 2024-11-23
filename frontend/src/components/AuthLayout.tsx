@@ -1,6 +1,7 @@
 import { MessagesSquare, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import AuthImagePattern from "./AuthImagePattern";
 
 interface InputField {
   name: string;
@@ -8,6 +9,7 @@ interface InputField {
   placeholder: string;
   Icon: React.ComponentType<any>;
   showToggle?: boolean;
+  validation?: (value: string) => string | null;
 }
 
 interface AuthLayoutProps {
@@ -17,8 +19,9 @@ interface AuthLayoutProps {
   submitText: string;
   footerText: string;
   footerLink: { text: string; path: string };
-  submitHandler: (formData: FormData) => void;
+  submitHandler: (formData: Record<string, string>) => void;
   isLoading: boolean;
+  rightPanelProps: { title: string; subtitle: string };
 }
 
 const AuthLayout = ({
@@ -30,29 +33,58 @@ const AuthLayout = ({
   footerLink,
   submitHandler,
   isLoading,
+  rightPanelProps,
 }: AuthLayoutProps) => {
-  const [formData, setFormData] = useState<FormData | null>(null);
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [showPassword, setShowPassword] = useState(false);
 
+  const validateField = (name: string, value: string): string | null => {
+    const field = fields.find((field) => field.name === name);
+    return field?.validation ? field.validation(value) : null;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const updatedFormData = formData || new FormData();
-    updatedFormData.set(e.target.name, e.target.value);
-    setFormData(updatedFormData);
+    const { name, value } = e.target;
+
+    // Validate the field and store its error
+    const error = validateField(name, value);
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
+
+    // Update form data
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (formData) submitHandler(formData);
+
+    // Run validation for all fields
+    const validationErrors: Record<string, string | null> = {};
+    fields.forEach(({ name }) => {
+      const error = validateField(name, formData[name] || "");
+      validationErrors[name] = error;
+    });
+
+    setErrors(validationErrors);
+
+    // Check if there are any errors before submitting
+    if (Object.values(validationErrors).some((error) => error)) {
+      return;
+    }
+
+    submitHandler(formData);
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-gray-900 text-gray-100">
+    <div className="grid grid-cols-1 lg:grid-cols-2 h-screen bg-gray-900 text-gray-100">
       {/* Left Panel */}
-      <div className="w-full md:w-1/2 flex flex-col items-center justify-center bg-gray-800 px-10 py-6 shadow-lg">
+      <div className="flex flex-col items-center justify-center bg-gray-800 px-10 py-6 shadow-lg">
         {/* Top Message Icon */}
         <div className="flex flex-col items-center mb-6">
           <MessagesSquare className="w-10 h-10 text-purple-500 mb-3" />
-          <h2 className="text-3xl font-semibold text-yellow-400">{title}</h2>
+          <h2 className="text-3xl font-semibold text-yellow-400 pb-2">
+            {title}
+          </h2>
           <p className="text-center text-gray-400">{subtitle}</p>
         </div>
 
@@ -72,7 +104,9 @@ const AuthLayout = ({
                     }
                     name={field.name}
                     placeholder={field.placeholder}
-                    className="input input-bordered w-full bg-gray-700 border-gray-600 text-gray-100 pl-8 pr-10"
+                    className={`input input-bordered w-full bg-gray-700 border-gray-600 text-gray-100 pl-8 pr-10 ${
+                      errors[field.name] ? "border-red-500" : ""
+                    }`}
                     onChange={handleInputChange}
                   />
                   <field.Icon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-5 h-5" />
@@ -90,6 +124,11 @@ const AuthLayout = ({
                     </button>
                   )}
                 </div>
+                {errors[field.name] && (
+                  <p className="mt-1 text-red-500 text-sm">
+                    {errors[field.name]}
+                  </p>
+                )}
               </div>
             ))}
 
@@ -117,16 +156,7 @@ const AuthLayout = ({
       </div>
 
       {/* Right Panel */}
-      <div className="hidden md:flex w-1/2 items-center justify-center bg-gray-700">
-        <div className="grid grid-cols-3 gap-4 w-3/4">
-          {Array.from({ length: 9 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-24 bg-yellow-500 rounded-lg opacity-70 hover:opacity-100 transition duration-300"
-            ></div>
-          ))}
-        </div>
-      </div>
+      <AuthImagePattern {...rightPanelProps} />
     </div>
   );
 };

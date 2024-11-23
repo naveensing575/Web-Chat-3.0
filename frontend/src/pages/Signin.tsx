@@ -1,23 +1,12 @@
 import AuthLayout from "../components/AuthLayout";
 import { useAuthStore } from "../store/useAuthStore";
 import { Mail, Lock } from "lucide-react";
-import { axiosInstance } from "../services/axios";
 
 const SignIn = () => {
-  const { isLoginingIn } = useAuthStore();
+  const { isLoginingIn, signIn } = useAuthStore();
 
-  const handleSignIn = async (formData: FormData) => {
-    try {
-      useAuthStore.setState({ isLoginingIn: true });
-      const res = await axiosInstance.post("/auth/signin", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      console.log("SignIn successful: ", res.data);
-    } catch (error) {
-      console.error("SignIn error: ", error);
-    } finally {
-      useAuthStore.setState({ isLoginingIn: false });
-    }
+  const handleSignIn = async (formData: Record<string, string>) => {
+    await signIn(formData);
   };
 
   return (
@@ -44,6 +33,11 @@ const SignIn = () => {
       footerLink={{ text: "Create Account", path: "/sign-up" }}
       submitHandler={handleSignIn}
       isLoading={isLoginingIn}
+      rightPanelProps={{
+        title: "Welcome back!",
+        subtitle:
+          "Sign in to continue your conversations and catch up with your messages.",
+      }}
     />
   );
 };

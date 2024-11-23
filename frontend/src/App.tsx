@@ -13,6 +13,7 @@ import Signin from "./pages/SignIn";
 import { useAuthStore } from "./store/useAuthStore";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -31,7 +32,9 @@ const App = () => {
     );
 
   return (
-    <div className="flex flex-col h-screen ">
+    <div className="flex flex-col h-screen">
+      {/* Toaster for Notifications */}
+      <Toaster position="top-right" reverseOrder={false} />
       <Navbar />
       <Router>
         <Routes>

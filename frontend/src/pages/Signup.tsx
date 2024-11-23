@@ -1,23 +1,12 @@
 import AuthLayout from "../components/AuthLayout";
 import { useAuthStore } from "../store/useAuthStore";
 import { User, Mail, Lock } from "lucide-react";
-import { axiosInstance } from "../services/axios";
 
 const Signup = () => {
-  const { isSingingUp } = useAuthStore();
+  const { isSingingUp, signUp } = useAuthStore();
 
-  const handleSignup = async (formData: FormData) => {
-    try {
-      useAuthStore.setState({ isSingingUp: true });
-      const res = await axiosInstance.post("/auth/signup", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      console.log("Signup successful: ", res.data);
-    } catch (error) {
-      console.error("Signup error: ", error);
-    } finally {
-      useAuthStore.setState({ isSingingUp: false });
-    }
+  const handleSignup = async (formData: Record<string, string>) => {
+    await signUp(formData);
   };
 
   return (
@@ -45,6 +34,11 @@ const Signup = () => {
       footerLink={{ text: "Sign In", path: "/sign-in" }}
       submitHandler={handleSignup}
       isLoading={isSingingUp}
+      rightPanelProps={{
+        title: "Join our community",
+        subtitle:
+          "Connect with friends, share moments, and stay in touch with your loved ones.",
+      }}
     />
   );
 };
