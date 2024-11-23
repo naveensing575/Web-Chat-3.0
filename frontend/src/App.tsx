@@ -13,8 +13,10 @@ const App = () => {
 
   useEffect(() => {
     checkAuth();
-    console.log("Auth user: ", authUser);
   }, [checkAuth]);
+
+  console.log("Auth user: ", authUser);
+
   return (
     <div>
       <Navbar />
