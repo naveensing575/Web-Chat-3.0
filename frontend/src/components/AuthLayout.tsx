@@ -81,11 +81,9 @@ const AuthLayout = ({
       <div className="flex flex-col items-center justify-center bg-gray-800 px-10 py-6 shadow-lg">
         {/* Top Message Icon */}
         <div className="flex flex-col items-center mb-6">
-          <MessagesSquare className="w-10 h-10 text-purple-500 mb-3" />
-          <h2 className="text-3xl font-semibold text-yellow-400 pb-2">
-            {title}
-          </h2>
-          <p className="text-center text-gray-400">{subtitle}</p>
+          <MessagesSquare className="w-10 h-10 text-primary mb-3" />
+          <h2 className="text-3xl font-semibold text-white mb-2">{title}</h2>
+          <p className="text-center text-white">{subtitle}</p>
         </div>
 
         {/* Form */}
@@ -109,12 +107,12 @@ const AuthLayout = ({
                     }`}
                     onChange={handleInputChange}
                   />
-                  <field.Icon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-5 h-5" />
+                  <field.Icon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-primary w-5 h-5" />
                   {field.showToggle && (
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-2 flex items-center justify-center text-gray-400 hover:text-yellow-400 transition duration-300"
+                      className="absolute inset-y-0 right-2 flex items-center justify-center text-gray-400 hover:text-secondary transition duration-300"
                     >
                       {showPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -125,7 +123,7 @@ const AuthLayout = ({
                   )}
                 </div>
                 {errors[field.name] && (
-                  <p className="mt-1 text-red-500 text-sm">
+                  <p className="mt-1 text-error text-sm">
                     {errors[field.name]}
                   </p>
                 )}
@@ -135,7 +133,7 @@ const AuthLayout = ({
             {/* Submit Button */}
             <button
               type="submit"
-              className={`btn btn-warning w-full font-semibold`}
+              className={`btn btn-primary w-full font-semibold`}
               disabled={isLoading}
             >
               {isLoading ? "Loading..." : submitText}
@@ -145,10 +143,7 @@ const AuthLayout = ({
           {/* Footer Link */}
           <p className="text-center text-gray-400 mt-4">
             {footerText}{" "}
-            <Link
-              to={footerLink.path}
-              className="text-yellow-400 hover:underline"
-            >
+            <Link to={footerLink.path} className="hover:underline">
               {footerLink.text}
             </Link>
           </p>

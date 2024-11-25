@@ -14,11 +14,11 @@ function Navbar() {
   };
 
   return (
-    <div className="flex items-center justify-between bg-gray-900 text-gray-100 px-6 py-4 shadow-md">
+    <div className="flex items-center justify-between bg-base-100 text-base-content px-6 py-4 shadow-md">
       {/* Logo Section */}
       <Link to="/" className="flex items-center">
-        <MessagesSquare className="w-6 h-6 text-purple-400 mr-2" />
-        <span className="text-xl font-bold text-yellow-500 hover:cursor-pointer">
+        <MessagesSquare className="w-6 h-6 text-primary mr-2" />
+        <span className="text-xl font-bold text-secondary hover:cursor-pointer">
           Chatty
         </span>
       </Link>
@@ -27,7 +27,7 @@ function Navbar() {
       <div className="flex items-center space-x-6">
         {/* Settings: Always Visible */}
         <Link
-          className="flex items-center text-gray-300 hover:text-yellow-400"
+          className="flex items-center text-base-content hover:text-accent"
           to="/settings"
         >
           <Settings className="w-5 h-5 mr-1" />
@@ -40,7 +40,7 @@ function Navbar() {
             {/* Profile */}
             <Link
               to="/profile"
-              className="flex items-center text-gray-300 hover:text-yellow-400"
+              className="flex items-center text-base-content hover:text-accent"
             >
               <User className="w-5 h-5 mr-1" />
               <span className="hidden md:block">Profile</span>
@@ -48,7 +48,7 @@ function Navbar() {
 
             {/* Logout */}
             <button
-              className="flex items-center text-gray-300 hover:text-yellow-400"
+              className="flex items-center text-base-content hover:text-error"
               onClick={handleLogout}
             >
               <LogOut className="w-5 h-5 mr-1" />

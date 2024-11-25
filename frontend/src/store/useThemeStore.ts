@@ -6,9 +6,9 @@ interface ThemeState {
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({
-  theme: localStorage.getItem("chat-theme") || "coffee", // Default theme
+  theme: localStorage.getItem("chat-theme") || "coffee",
   setTheme: (theme: string) => {
-    localStorage.setItem("chat-theme", theme); // Persist theme to localStorage
+    localStorage.setItem("chat-theme", theme);
     set({ theme });
   },
 }));
