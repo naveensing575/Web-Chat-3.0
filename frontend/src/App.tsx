@@ -11,12 +11,14 @@ import Settings from "./pages/Settings";
 import Signup from "./pages/SignUp";
 import Signin from "./pages/SignIn";
 import { useAuthStore } from "./store/useAuthStore";
+import { useThemeStore } from "./store/useThemeStore";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+  const { theme } = useThemeStore();
 
   useEffect(() => {
     checkAuth();
@@ -31,7 +33,7 @@ const App = () => {
 
   return (
     <Router>
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-screen" data-theme={theme}>
         {/* Toaster for Notifications */}
         <Toaster position="top-center" reverseOrder={false} />
 

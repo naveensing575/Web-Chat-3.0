@@ -23,41 +23,40 @@ function Navbar() {
         </span>
       </Link>
 
-      {/* Right Section: Settings, Profile, Logout */}
-      {authUser ? (
-        <div className="flex items-center space-x-6">
-          {/* Settings */}
-          <Link
-            className="flex items-center text-gray-300 hover:text-yellow-400"
-            to="/settings"
-          >
-            <Settings className="w-5 h-5 mr-1" />
-            <span className="hidden md:block">Settings</span>
-          </Link>
-
-          {/* Profile */}
-          <Link
-            to="/profile"
-            className="flex items-center text-gray-300 hover:text-yellow-400"
-          >
-            <User className="w-5 h-5 mr-1" />
-            <span className="hidden md:block">Profile</span>
-          </Link>
-
-          {/* Logout */}
-          <button
-            className="flex items-center text-gray-300 hover:text-yellow-400"
-            onClick={handleLogout}
-          >
-            <LogOut className="w-5 h-5 mr-1" />
-            <span className="hidden md:block">Logout</span>
-          </button>
-        </div>
-      ) : (
-        <Link to="/login" className="text-yellow-500 hover:underline">
-          Login
+      {/* Navigation Section */}
+      <div className="flex items-center space-x-6">
+        {/* Settings: Always Visible */}
+        <Link
+          className="flex items-center text-gray-300 hover:text-yellow-400"
+          to="/settings"
+        >
+          <Settings className="w-5 h-5 mr-1" />
+          <span className="hidden md:block">Settings</span>
         </Link>
-      )}
+
+        {/* Profile and Logout: Visible Only for Logged-in Users */}
+        {authUser && (
+          <>
+            {/* Profile */}
+            <Link
+              to="/profile"
+              className="flex items-center text-gray-300 hover:text-yellow-400"
+            >
+              <User className="w-5 h-5 mr-1" />
+              <span className="hidden md:block">Profile</span>
+            </Link>
+
+            {/* Logout */}
+            <button
+              className="flex items-center text-gray-300 hover:text-yellow-400"
+              onClick={handleLogout}
+            >
+              <LogOut className="w-5 h-5 mr-1" />
+              <span className="hidden md:block">Logout</span>
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 }
