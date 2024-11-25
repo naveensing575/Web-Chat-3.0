@@ -22,8 +22,6 @@ const App = () => {
     checkAuth();
   }, [checkAuth]);
 
-  console.log("Auth user: ", authUser);
-
   if (isCheckingAuth && !authUser)
     return (
       <div className="flex items-center justify-center h-screen">
@@ -32,11 +30,15 @@ const App = () => {
     );
 
   return (
-    <div className="flex flex-col h-screen">
-      {/* Toaster for Notifications */}
-      <Toaster position="top-right" reverseOrder={false} />
-      <Navbar />
-      <Router>
+    <Router>
+      <div className="flex flex-col h-screen">
+        {/* Toaster for Notifications */}
+        <Toaster position="top-center" reverseOrder={false} />
+
+        {/* Navbar */}
+        <Navbar />
+
+        {/* Routes */}
         <Routes>
           <Route
             path="/"
@@ -57,8 +59,8 @@ const App = () => {
           />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
-      </Router>
-    </div>
+      </div>
+    </Router>
   );
 };
 

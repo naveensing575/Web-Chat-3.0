@@ -1,89 +1,126 @@
 import User from "@/models/user.model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import cloudinary from "@/config/cloudinaryConfig";
 
 class AuthService {
   async signUp(
     email: string,
     fullName: string,
     password: string
-  ): Promise<string> {
-    // Check if user already exists
+  ): Promise<{ user: any; token: string }> {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       throw new Error("Email is already in use");
     }
 
-    // Validate password length
     if (password.length < 6) {
       throw new Error("Password must be at least 6 characters long");
     }
 
-    // Hash the password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create a new user
     const newUser = await User.create({
       email,
       fullName,
       password: hashedPassword,
     });
 
-    // Generate JWT token
-    return this.generateToken(newUser._id.toString(), newUser.email);
+    const token = this.generateToken(newUser._id.toString(), newUser.email);
+
+    return {
+      user: {
+        id: newUser._id,
+        email: newUser.email,
+        fullName: newUser.fullName,
+        profilePic: null, // Default to null for new users
+        createdAt: newUser.createdAt,
+      },
+      token,
+    };
   }
 
-  async signIn(email: string, password: string): Promise<string> {
-    // Find the user
+  async signIn(
+    email: string,
+    password: string
+  ): Promise<{ user: any; token: string }> {
     const user = await User.findOne({ email });
     if (!user) {
       throw new Error("Invalid credentials");
     }
 
-    // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       throw new Error("Invalid credentials");
     }
 
-    // Generate JWT token
-    return this.generateToken(user._id.toString(), user.email);
+    const token = this.generateToken(user._id.toString(), user.email);
+
+    return {
+      user: {
+        id: user._id,
+        email: user.email,
+        fullName: user.fullName,
+        profilePic: user.profilePic || null,
+        createdAt: user.createdAt,
+      },
+      token,
+    };
   }
 
-  async updateUser(
+  async checkAuth(token: string): Promise<any> {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+        id: string;
+        email: string;
+      };
+      const user = await User.findById(decoded.id);
+      if (!user) {
+        throw new Error("User not found");
+      }
+      return {
+        id: user._id,
+        email: user.email,
+        fullName: user.fullName,
+        profilePic: user.profilePic || null,
+        createdAt: user.createdAt,
+      };
+    } catch (error) {
+      throw new Error("Invalid token");
+    }
+  }
+
+  async updateProfilePic(
     userId: string,
-    updateData: { fullName?: string; email?: string; password?: string }
-  ): Promise<{ token: string } | null> {
+    file: Express.Multer.File
+  ): Promise<any> {
     const user = await User.findById(userId);
     if (!user) {
       throw new Error("User not found");
     }
 
-    // Handle password hashing if password is updated
-    if (updateData.password) {
-      if (updateData.password.length < 6) {
-        throw new Error("Password must be at least 6 characters long");
-      }
-      const saltRounds = 10;
-      updateData.password = await bcrypt.hash(updateData.password, saltRounds);
-    }
+    // Upload image to Cloudinary
+    const uploadResult = await cloudinary.uploader.upload(file.path, {
+      folder: "profile_pics",
+      resource_type: "image",
+    });
 
-    // Update user data
-    Object.assign(user, updateData);
+    // Update user's profilePic with the new URL
+    user.profilePic = uploadResult.secure_url;
     await user.save();
 
-    // Generate a new JWT token if email is updated
-    const token = this.generateToken(user._id.toString(), user.email);
-    return { token };
+    return {
+      id: user._id,
+      email: user.email,
+      fullName: user.fullName,
+      profilePic: user.profilePic,
+      createdAt: user.createdAt,
+    };
   }
 
   async signOut(): Promise<string> {
-    return "Successfully signed out";
-  }
-
-  async checkAuth(): Promise<string> {
-    return "Authorized";
+    return "Sign-out successful";
   }
 
   private generateToken(id: string, email: string): string {

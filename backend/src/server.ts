@@ -7,7 +7,6 @@ import helmet from "helmet";
 import "tsconfig-paths/register";
 import connectDB from "@/config/dbConfig";
 import authRoutes from "@/routes/auth.route";
-import userRoutes from "@/routes/user.route";
 import messageRoutes from "@/routes/message.route";
 import authMiddleware from "@/middlewares/authMiddleware";
 
@@ -28,7 +27,6 @@ app.use(morgan("combined"));
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/users", authMiddleware, userRoutes);
 app.use("/api/messages", authMiddleware, messageRoutes);
 
 // Secure route

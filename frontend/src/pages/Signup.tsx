@@ -3,7 +3,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { User, Mail, Lock } from "lucide-react";
 
 const Signup = () => {
-  const { isSingingUp, signUp } = useAuthStore();
+  const { isSigningUp, signUp } = useAuthStore();
 
   const handleSignup = async (formData: Record<string, string>) => {
     await signUp(formData);
@@ -33,7 +33,7 @@ const Signup = () => {
       footerText="Already have an account?"
       footerLink={{ text: "Sign In", path: "/sign-in" }}
       submitHandler={handleSignup}
-      isLoading={isSingingUp}
+      isLoading={isSigningUp}
       rightPanelProps={{
         title: "Join our community",
         subtitle:

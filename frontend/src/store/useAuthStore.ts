@@ -2,32 +2,49 @@ import { create } from "zustand";
 import { axiosInstance } from "../services/axios";
 import { toast } from "react-hot-toast";
 
+interface AuthUser {
+  id?: string;
+  email?: string;
+  profilePic?: string;
+  fullName?: string;
+  createdAt?: string;
+}
+
 interface AuthState {
-  authUser: any;
+  authUser: AuthUser | null;
   isCheckingAuth: boolean;
-  isSingingUp: boolean;
+  isSigningUp: boolean;
   isLoginingIn: boolean;
   isUpdatingProfile: boolean;
   checkAuth: () => Promise<void>;
   signUp: (data: Record<string, string>) => Promise<void>;
   signIn: (data: Record<string, string>) => Promise<void>;
   logout: () => Promise<void>;
+  updateProfilePic: (file: File) => Promise<void>;
 }
 
-// Create the auth store with Zustand
 export const useAuthStore = create<AuthState>((set) => ({
-  authUser: null,
+  authUser: null, // Initialize with null; will fetch on checkAuth
   isCheckingAuth: true,
-  isSingingUp: false,
+  isSigningUp: false,
   isLoginingIn: false,
   isUpdatingProfile: false,
 
   checkAuth: async () => {
+    set({ isCheckingAuth: true });
     try {
-      const res = await axiosInstance.get("/auth/checkAuth");
-      set({ authUser: res.data });
+      const res = await axiosInstance.get("/auth/checkAuth", {
+        withCredentials: true,
+      });
+      if (res.data.success && res.data.data) {
+        const userData = res.data.data;
+        set({ authUser: userData });
+      } else {
+        console.error("Authentication failed:", res.data.message);
+        set({ authUser: null });
+      }
     } catch (error) {
-      console.error("Error in checkAuth: ", error);
+      console.error("Error in checkAuth:", error);
       set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
@@ -35,27 +52,43 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   signUp: async (data) => {
-    set({ isSingingUp: true });
+    set({ isSigningUp: true });
     try {
-      const res = await axiosInstance.post("/auth/signup", data);
-      set({ authUser: res.data });
-      toast.success("Sign-up successful!");
+      const res = await axiosInstance.post("/auth/signup", data, {
+        withCredentials: true,
+      });
+      if (res.data.success && res.data.data) {
+        const userData = res.data.data;
+        set({ authUser: userData });
+        toast.success("Sign-up successful!");
+      } else {
+        console.error("Sign-up failed:", res.data.message);
+        toast.error(res.data.message || "Sign-up failed.");
+      }
     } catch (error: any) {
-      console.error("SignUp error: ", error.response?.data?.message || error);
+      console.error("SignUp error:", error.response?.data?.message || error);
       toast.error(error.response?.data?.message || "Sign-up failed.");
     } finally {
-      set({ isSingingUp: false });
+      set({ isSigningUp: false });
     }
   },
 
   signIn: async (data) => {
     set({ isLoginingIn: true });
     try {
-      const res = await axiosInstance.post("/auth/signin", data);
-      set({ authUser: res.data });
-      toast.success("Sign-in successful!");
+      const res = await axiosInstance.post("/auth/signin", data, {
+        withCredentials: true,
+      });
+      if (res.data.success && res.data.data) {
+        const userData = res.data.data;
+        set({ authUser: userData });
+        toast.success("Sign-in successful!");
+      } else {
+        console.error("Sign-in failed:", res.data.message);
+        toast.error(res.data.message || "Sign-in failed.");
+      }
     } catch (error: any) {
-      console.error("SignIn error: ", error.response?.data?.message || error);
+      console.error("SignIn error:", error.response?.data?.message || error);
       toast.error(error.response?.data?.message || "Sign-in failed.");
     } finally {
       set({ isLoginingIn: false });
@@ -64,12 +97,47 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     try {
-      await axiosInstance.post("/auth/signout");
+      await axiosInstance.post("/auth/signout", {}, { withCredentials: true });
       set({ authUser: null });
       toast.success("Logout successful!");
     } catch (error) {
-      console.error("Logout error: ", error);
+      console.error("Logout error:", error);
       toast.error("Logout failed.");
+    }
+  },
+
+  updateProfilePic: async (file) => {
+    const formData = new FormData();
+    formData.append("profilePic", file);
+
+    set({ isUpdatingProfile: true });
+    try {
+      const res = await axiosInstance.put("/auth/updateProfilePic", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
+      if (res.data.success && res.data.data.profilePic) {
+        const updatedProfilePic = res.data.data.profilePic;
+
+        set((state) => ({
+          authUser: {
+            ...state.authUser,
+            profilePic: updatedProfilePic,
+          },
+        }));
+
+        toast.success("Profile picture updated successfully!");
+      } else {
+        console.error("Profile picture update failed:", res.data.message);
+        toast.error(res.data.message || "Profile picture update failed.");
+      }
+    } catch (error: any) {
+      console.error("Error updating profile picture:", error);
+      toast.error(
+        error.response?.data?.message || "Profile picture update failed."
+      );
+    } finally {
+      set({ isUpdatingProfile: false });
     }
   },
 }));
