@@ -7,7 +7,7 @@ const BASE_URL =
   import.meta.env.MODE === "development" ? "http://localhost:4000" : "/";
 
 interface AuthUser {
-  id?: string;
+  id: string;
   email?: string;
   profilePic?: string;
   fullName?: string;
@@ -20,7 +20,7 @@ interface AuthState {
   isSigningUp: boolean;
   isLoginingIn: boolean;
   isUpdatingProfile: boolean;
-  onlineUsers: AuthUser[];
+  onlineUsers: string[]; // Updated type to string[] (array of user IDs)
   socket: Socket | null;
   checkAuth: () => Promise<void>;
   signUp: (data: Record<string, string>) => Promise<void>;
@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isSigningUp: false,
   isLoginingIn: false,
   isUpdatingProfile: false,
-  onlineUsers: [],
+  onlineUsers: [], // Updated initial state to match new type
   socket: null,
 
   checkAuth: async () => {
@@ -116,7 +116,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  updateProfilePic: async (file) => {
+  updateProfilePic: async (file: File) => {
     const formData = new FormData();
     formData.append("profilePic", file);
 
@@ -133,7 +133,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           authUser: {
             ...state.authUser,
             profilePic: updatedProfilePic,
-          },
+          } as AuthUser, // Explicitly cast as AuthUser
         }));
 
         toast.success("Profile picture updated successfully!");
@@ -163,8 +163,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     set({ socket });
 
-    socket.on("getOnlineUsers", (userIds) => {
-      set({ onlineUsers: userIds });
+    // Assume `getOnlineUsers` returns an array of strings (user IDs)
+    socket.on("getOnlineUsers", (userIds: string[]) => {
+      set({ onlineUsers: userIds }); // Update `onlineUsers` state with the list of user IDs
     });
   },
 

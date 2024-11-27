@@ -7,9 +7,8 @@ import { useAuthStore } from "./useAuthStore";
 interface User {
   id: string;
   name: string;
-  selectedUser: null;
-  isUsersLoading: false;
-  isMessagesLoading: false;
+  profilePic: string;
+  fullName: string;
 }
 
 interface Message {
@@ -18,11 +17,14 @@ interface Message {
   senderId: string;
   receiverId: string;
   timestamp: string;
+  image: string;
+  text: string;
 }
 
 interface ChatState {
   messages: Message[];
   users: User[];
+  sendMessage: (messageData: any) => Promise<void>;
   selectedUser: User | null;
   isUsersLoading: boolean;
   isMessagesLoading: boolean;
@@ -30,6 +32,8 @@ interface ChatState {
   getUsers: () => Promise<void>;
   getMessages: (userId: string) => Promise<void>;
   setSelectedUser: (selectedUser: User | null) => void;
+  subscribeToMessages: () => void;
+  unsubscribeFromMessages: () => void;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -100,6 +104,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     const socket = useAuthStore.getState().socket;
 
+    if (!socket) {
+      console.error("Socket is null, cannot subscribe to messages.");
+      return;
+    }
+
     socket.on("newMessage", (newMessage: Message) => {
       const isMessageSentFromSelectedUser =
         newMessage.senderId === selectedUser.id;
@@ -113,6 +122,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
+
+    if (!socket) {
+      console.error("Socket is null, cannot unsubscribe from messages.");
+      return;
+    }
+
     socket.off("newMessage");
   },
 
