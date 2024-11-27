@@ -27,14 +27,14 @@ class AuthService {
       password: hashedPassword,
     });
 
-    const token = this.generateToken(newUser._id.toString(), newUser.email);
+    const token = this.generateToken(newUser._id.toString());
 
     return {
       user: {
         id: newUser._id,
         email: newUser.email,
         fullName: newUser.fullName,
-        profilePic: null, // Default to null for new users
+        profilePic: null,
         createdAt: newUser.createdAt,
       },
       token,
@@ -55,40 +55,32 @@ class AuthService {
       throw new Error("Invalid credentials");
     }
 
-    const token = this.generateToken(user._id.toString(), user.email);
+    const token = this.generateToken(user._id.toString());
 
     return {
       user: {
         id: user._id,
         email: user.email,
         fullName: user.fullName,
-        profilePic: user.profilePic || null,
+        profilePic: user.profilePic ?? null,
         createdAt: user.createdAt,
       },
       token,
     };
   }
 
-  async checkAuth(token: string): Promise<any> {
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-        id: string;
-        email: string;
-      };
-      const user = await User.findById(decoded.id);
-      if (!user) {
-        throw new Error("User not found");
-      }
-      return {
-        id: user._id,
-        email: user.email,
-        fullName: user.fullName,
-        profilePic: user.profilePic || null,
-        createdAt: user.createdAt,
-      };
-    } catch (error) {
-      throw new Error("Invalid token");
+  async checkAuth(userId: string): Promise<any> {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error("User not found");
     }
+    return {
+      id: user._id,
+      email: user.email,
+      fullName: user.fullName,
+      profilePic: user.profilePic ?? null,
+      createdAt: user.createdAt,
+    };
   }
 
   async updateProfilePic(
@@ -123,8 +115,8 @@ class AuthService {
     return "Sign-out successful";
   }
 
-  private generateToken(id: string, email: string): string {
-    return jwt.sign({ id, email }, process.env.JWT_SECRET!, {
+  private generateToken(id: string): string {
+    return jwt.sign({ userId: id }, process.env.JWT_SECRET!, {
       expiresIn: "1d",
     });
   }

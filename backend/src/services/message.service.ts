@@ -3,7 +3,9 @@ import FileService from "@/services/FileService";
 
 class MessageService {
   async sendMessage(
-    data: Partial<IMessage>,
+    senderId: string,
+    receiverId: string,
+    text: string,
     filePath?: string
   ): Promise<IMessage> {
     // Upload the image to Cloudinary if a file is provided
@@ -14,10 +16,10 @@ class MessageService {
 
     // Create the message
     const messageData = {
-      senderId: data.senderId,
-      receiverId: data.receiverId,
-      text: data.text,
-      image: imageUrl || data.image,
+      senderId,
+      receiverId,
+      text,
+      image: imageUrl || null,
     };
 
     return await Message.create(messageData);
