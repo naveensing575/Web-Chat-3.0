@@ -2,7 +2,7 @@ import cloudinary from "@/config/cloudinaryConfig";
 import User, { IUser } from "@/models/user.model";
 
 class UserService {
-  async createUser(userData: Omit<IUser, "_id">): Promise<IUser> {
+  async createUser(userData: Omit<IUser, "id">): Promise<IUser> {
     return await User.create(userData);
   }
 
@@ -42,7 +42,7 @@ class UserService {
 
   // Updated: Get all users except the logged-in user
   async getUserForSidebar(userId: string): Promise<IUser[]> {
-    const filteredUsers = await User.find({ _id: { $ne: userId } }).select(
+    const filteredUsers = await User.find({ id: { $ne: userId } }).select(
       "-password"
     );
     return filteredUsers;

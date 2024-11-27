@@ -1,6 +1,10 @@
 import { create } from "zustand";
 import { axiosInstance } from "../services/axios";
 import { toast } from "react-hot-toast";
+import { io, Socket } from "socket.io-client";
+
+const BASE_URL =
+  import.meta.env.MODE === "development" ? "http://localhost:4000" : "/";
 
 interface AuthUser {
   id?: string;
@@ -17,20 +21,24 @@ interface AuthState {
   isLoginingIn: boolean;
   isUpdatingProfile: boolean;
   onlineUsers: AuthUser[];
+  socket: Socket | null;
   checkAuth: () => Promise<void>;
   signUp: (data: Record<string, string>) => Promise<void>;
   signIn: (data: Record<string, string>) => Promise<void>;
   logout: () => Promise<void>;
   updateProfilePic: (file: File) => Promise<void>;
+  connectSocket: () => void;
+  disconnectSocket: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   authUser: null,
   isCheckingAuth: true,
   isSigningUp: false,
   isLoginingIn: false,
   isUpdatingProfile: false,
   onlineUsers: [],
+  socket: null,
 
   checkAuth: async () => {
     set({ isCheckingAuth: true });
@@ -140,6 +148,30 @@ export const useAuthStore = create<AuthState>((set) => ({
       );
     } finally {
       set({ isUpdatingProfile: false });
+    }
+  },
+
+  connectSocket: () => {
+    const { authUser } = get();
+    if (!authUser || get().socket?.connected) return;
+
+    const socket: Socket = io(BASE_URL, {
+      query: {
+        userId: authUser.id,
+      },
+    });
+
+    set({ socket });
+
+    socket.on("getOnlineUsers", (userIds) => {
+      set({ onlineUsers: userIds });
+    });
+  },
+
+  disconnectSocket: () => {
+    const socket = get().socket;
+    if (socket && socket.connected) {
+      socket.disconnect();
     }
   },
 }));

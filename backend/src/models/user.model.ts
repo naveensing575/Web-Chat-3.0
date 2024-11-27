@@ -5,7 +5,7 @@ export interface IUser extends Document {
   fullName: string;
   password: string;
   profilePic?: string;
-  _id: mongoose.Types.ObjectId;
+  id: mongoose.Types.ObjectId;
   createdAt: Date;
 }
 

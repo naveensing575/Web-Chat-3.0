@@ -11,7 +11,7 @@ class MessageController {
       const { receiverId, text } = req.body;
 
       // Extract senderId from the authenticated user (middleware adds `user` to req)
-      const senderId = (req as any).user._id;
+      const senderId = (req as any).user.id;
 
       // Validate required fields
       if (!senderId || !receiverId || (!text && !req.file)) {
@@ -54,7 +54,7 @@ class MessageController {
   ): Promise<void> {
     try {
       // Extract userId from the authenticated user (middleware adds `user` to req)
-      const userId = (req as any).user._id;
+      const userId = (req as any).user.id;
 
       const messages = await MessageService.getMessagesByUser(userId);
       res.status(200).json({ success: true, data: messages });
@@ -72,7 +72,7 @@ class MessageController {
       const { receiverId } = req.params;
 
       // Extract senderId from the authenticated user (middleware adds `user` to req)
-      const senderId = (req as any).user._id;
+      const senderId = (req as any).user.id;
 
       if (!receiverId) {
         res.status(400).json({

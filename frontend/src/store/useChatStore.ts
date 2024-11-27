@@ -1,12 +1,15 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
 import { axiosInstance } from "../services/axios";
+import { useAuthStore } from "./useAuthStore";
 
 // Define types for the state and actions
 interface User {
   id: string;
   name: string;
-  [key: string]: any;
+  selectedUser: null;
+  isUsersLoading: false;
+  isMessagesLoading: false;
 }
 
 interface Message {
@@ -15,7 +18,6 @@ interface Message {
   senderId: string;
   receiverId: string;
   timestamp: string;
-  [key: string]: any;
 }
 
 interface ChatState {
@@ -30,7 +32,7 @@ interface ChatState {
   setSelectedUser: (selectedUser: User | null) => void;
 }
 
-export const useChatStore = create<ChatState>((set) => ({
+export const useChatStore = create<ChatState>((set, get) => ({
   messages: [],
   users: [],
   selectedUser: null,
@@ -79,5 +81,40 @@ export const useChatStore = create<ChatState>((set) => ({
     }
   },
 
-  setSelectedUser: (selectedUser: User | null) => set({ selectedUser }),
+  sendMessage: async (messageData: any) => {
+    const { selectedUser, messages } = get();
+    try {
+      const res = await axiosInstance.post(
+        `/messages/send/${selectedUser?.id}`,
+        messageData
+      );
+      set({ messages: [...messages, res.data] });
+    } catch (error: any) {
+      toast.error(error.response.data.message);
+    }
+  },
+
+  subscribeToMessages: () => {
+    const { selectedUser } = get();
+    if (!selectedUser) return;
+
+    const socket = useAuthStore.getState().socket;
+
+    socket.on("newMessage", (newMessage: Message) => {
+      const isMessageSentFromSelectedUser =
+        newMessage.senderId === selectedUser.id;
+      if (!isMessageSentFromSelectedUser) return;
+
+      set({
+        messages: [...get().messages, newMessage],
+      });
+    });
+  },
+
+  unsubscribeFromMessages: () => {
+    const socket = useAuthStore.getState().socket;
+    socket.off("newMessage");
+  },
+
+  setSelectedUser: (selectedUser) => set({ selectedUser }),
 }));

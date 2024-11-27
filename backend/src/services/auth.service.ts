@@ -27,11 +27,11 @@ class AuthService {
       password: hashedPassword,
     });
 
-    const token = this.generateToken(newUser._id.toString());
+    const token = this.generateToken(newUser.id.toString());
 
     return {
       user: {
-        id: newUser._id,
+        id: newUser.id,
         email: newUser.email,
         fullName: newUser.fullName,
         profilePic: null,
@@ -55,11 +55,11 @@ class AuthService {
       throw new Error("Invalid credentials");
     }
 
-    const token = this.generateToken(user._id.toString());
+    const token = this.generateToken(user.id.toString());
 
     return {
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
         fullName: user.fullName,
         profilePic: user.profilePic ?? null,
@@ -75,7 +75,7 @@ class AuthService {
       throw new Error("User not found");
     }
     return {
-      id: user._id,
+      id: user.id,
       email: user.email,
       fullName: user.fullName,
       profilePic: user.profilePic ?? null,
@@ -103,7 +103,7 @@ class AuthService {
     await user.save();
 
     return {
-      id: user._id,
+      id: user.id,
       email: user.email,
       fullName: user.fullName,
       profilePic: user.profilePic,
